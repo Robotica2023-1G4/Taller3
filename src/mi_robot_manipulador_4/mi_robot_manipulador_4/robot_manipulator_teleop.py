@@ -8,19 +8,24 @@ from pynput.keyboard import Key, Listener
 
 
 #Solicitamos las variables de velocidad 
-velx = input("Velocidad en x (Valor entre 1 y 10): ")
-vely = input("Velocidad en y (Valor entre 1 y 10): ")
+velrot = input("Velocidad rotación sobre su eje (Valor entre 1 y 10): ")
+velj1 = input("Velocidad juntura 1 (Valor entre 1 y 10): ")
+velj2 = input("Velocidad juntura 2 (Valor entre 1 y 10): ")
 velg = input("Velocidad garra (Valor entre 1 y 10): ")
 
-velx = float(velx)
-vely = float(vely)
+velrot = float(velrot)
+velj1 = float(velj1)
+velj2 = float(velj2)
+velg = float(velg)
 
 #Interfaz que indica las teclas a oprmir para mover el robot
 print("Para mover el robot, oprima las teclas indicadas a continuacion: ")
-print("w: Subir")
-print("s: Bajar")
-print("a: Izquierda")
-print("d: Derecha")
+print("w: Subir juntura 1")
+print("s: Bajar juntura 1")
+print("q: Subir juntura 2")
+print("a: Bajar juntura 2")
+print("z: Rotar sobre su eje en sentido horario")
+print("x: Rotar sobre su eje en sentido antihorario")
 print("i: Abrir garra")
 print("o: Cerrar garra")
 print("p: Salir")
@@ -46,40 +51,47 @@ class RobotManipulatorTeleop(Node):
         try:
             #Hacia arriba
             if key.char == "w":
-                self.app_twist(velx,0.0,0.0) 
+                self.app_twist(0.0,velj1,0.0,0.0)
             #Hacia abajo
             elif key.char == "s":
-                self.app_twist(-velx,0.0,0.0)
+                self.app_twist(0.0,-velj1,0.0,0.0)
             #Hacia la izquierda
-            elif key.char == "a":
-                self.app_twist(0.0,vely,0.0)
+            elif key.char == "q":
+                self.app_twist(0.0,0.0,velj2,0.0)
             #Hacia la derecha
-            elif key.char == "d":
-                self.app_twist(0.0,-vely,0.0)
+            elif key.char == "a":
+                self.app_twist(0.0,0.0,-velj2,0.0)
+            #Rotar en sentido horario
+            elif key.char == "z":
+                self.app_twist(velrot,0.0,0.0,0.0)
+            #Rotar en sentido antihorario
+            elif key.char == "x":
+                self.app_twist(-velrot,0.0,0.0,0.0)
             #Abrir garra
             elif key.char == "i":
-                self.app_twist(0.0,0.0,velg)
+                self.app_twist(0.0,0.0,0.0,0.0)
             #Cerrar garra
             elif key.char == "o":
-                self.app_twist(0.0,0.0,-velg)
+                self.app_twist(0.0,0.0,0.0,1.0)
             #Salir
             elif key.char == "p":
-                self.app_twist(0.0,0.0,0.0)
+                self.app_twist(0.0,0.0,0.0,0.0)
                 exit()
             else:
-                self.app_twist(0.0,0.0,0.0)
+                self.app_twist(0.0,0.0,0.0,0.0)
         except AttributeError:
             print("Tecla no valida")
 
     #Se crea la funcion que se encarga de recibir las teclas soltadas
     def on_release(self,key):
-        self.app_twist(0.0,0.0,0.0)
+        self.app_twist(0.0,0.0,0.0,0.0)
 
     #Se crea la funcion que se encarga de publicar los mensajes de velocidad
-    def app_twist(self, x, y, z):
-        self.msg.linear.x = x
-        self.msg.linear.y = y
-        self.msg.linear.z = z
+    def app_twist(self, rot, j1, j2, g):
+        self.msg.linear.x = rot
+        self.msg.linear.y = j1
+        self.msg.linear.z = j2
+        self.msg.angular.x = g
         self.pubcmd.publish(self.msg)
 
 #Se crea la funcion main

@@ -24,10 +24,11 @@ class RobotManipulatorController(Node):
         self.subscription  # prevent unused variable warning
 
     def listener_callback(self, msg):
-        x_speed = int(msg.linear.x * 100) # convertimos la velocidad lineal en un entero entre -100 y 100
-        y_speed = int(msg.linear.y * 100) # convertimos la velocidad lineal en un entero entre -100 y 100
-        g_speed = int(msg.linear.z * 100) # convertimos la velocidad lineal en un entero entre -100 y 100
-        message = f"{x_speed},{y_speed},{g_speed}\n" # creamos el mensaje con el formato requerido por Arduino
+        velRot = int(msg.linear.x) 
+        velj1 = int(msg.linear.y) 
+        velj2 = int(msg.linear.z)
+        velg = int(msg.angular.x) 
+        message = f"{velRot},{velj1},{velj2},{velg}\n" # creamos el mensaje con el formato requerido por Arduino
         self.serial_port.write(message.encode()) # enviamos el mensaje a través del puerto serial
         self.get_logger().info(f'Message sent: {message}')
 

@@ -26,16 +26,16 @@ class RobotManipulatorInterface(Node):
         super().__init__('robot_manipulator_interface')
         self.subscription = self.create_subscription(
             Twist,
-            'robot_manipulator_vel',
+            'robot_manipulator_pos',
             self.listener_callback,
             10)
         self.subscription  # prevent unused variable warning
         self.interfaz = interfaz
 
     def listener_callback(self, msg):
-        xact = int(msg.linear.x * 100) # convertimos la velocidad lineal en un entero entre -100 y 100
-        yact = int(msg.linear.y * 100) # convertimos la velocidad lineal en un entero entre -100 y 100
-        zact = int(msg.linear.z * 100) # convertimos la velocidad lineal en un entero entre -100 y 100
+        xact = int(msg.linear.x) 
+        yact = int(msg.linear.y) 
+        zact = int(msg.linear.z) 
 
         k = k+1
         x.append(xact)

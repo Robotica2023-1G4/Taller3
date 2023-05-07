@@ -20,8 +20,11 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'teleop = mi_robot_manipulador_4.robot_manipulator_teleop:main'
-            'control = mi_robot_manipulador_4.robot_manipulator_controller:main'
+            'teleop = mi_robot_manipulador_4.robot_manipulator_teleop:main',
+            'control = mi_robot_manipulador_4.robot_manipulator_controller:main',
+            'position = mi_robot_manipulador_4.robot_manipulator_position:main',
+            'interface = mi_robot_manipulador_4.robot_manipulator_interface:main',
+            'planner = mi_robot_manipulador_4.robot_manipulator_planner:main',
         ],
     },
 )

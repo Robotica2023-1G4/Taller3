@@ -9,7 +9,7 @@ import time
 import serial
 
 #Nombres entrada del puerto para los motores
-pserial = serial.Serial('/dev/ttyACM0', 9600)
+pserial = serial.Serial('/dev/ttyACM1', 9600)
 
 #Se crea la clase que se encarga de recibir los mensajes de velocidad
 class RobotManipulatorController(Node):
@@ -27,10 +27,12 @@ class RobotManipulatorController(Node):
         velRot = int(msg.linear.x) 
         velj1 = int(msg.linear.y) 
         velj2 = int(msg.linear.z)
-        velg = int(msg.angular.x) 
-        message = f"{velRot},{velj1},{velj2},{velg}\n" # creamos el mensaje con el formato requerido por Arduino
-        self.serial_port.write(message.encode()) # enviamos el mensaje a través del puerto serial
-        self.get_logger().info(f'Message sent: {message}')
+        velj3 = int(msg.angular.y)
+        velg = int(msg.angular.x)
+        velrotg = int(msg.angular.z) 
+        message = f"{velRot},{velj1},{velj2},{velj3},{velg},{velrotg}\n" # creamos el mensaje con el formato requerido por Arduino
+        pserial.write(message.encode()) # enviamos el mensaje a través del puerto serial
+        
 
 def main(args=None):
     rclpy.init(args=args)

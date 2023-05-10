@@ -9,7 +9,7 @@ import time
 import serial
 
 #Nombres entrada del puerto para los motores
-pserial = serial.Serial('/dev/ttyACM1', 9600)
+pserial = serial.Serial('/dev/ttyACM0', 9600)
 
 #Se crea la clase que se encarga de recibir los mensajes de velocidad
 class RobotManipulatorController(Node):

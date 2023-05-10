@@ -32,7 +32,7 @@ class RobotManipulatorPosition(Node):
         self.pubvel = self.create_publisher(Twist, 'robot_manipulator_vel', 10)
         self.subgoal = self.create_subscription(Twist, 'robot_manipulator_goal', self.listener_callback, 10)
         self.msg = Twist()
-
+        global goal,llamado
         while True:
             #Obtener angulos de los motores a partir del puerto serial
             grados = pserial.readline().decode().rstrip().split(',')
@@ -40,6 +40,10 @@ class RobotManipulatorPosition(Node):
             if len(grados) >= 4:
                 gradoRot, gradoj1, gradoj2, gradog = int(grados[0]), int(grados[1]), int(grados[2]), int(grados[3])
                 #Calcular posicion del end effector
+                print(gradoRot)
+                print(gradoj1)
+                print(gradoj2)
+                print(gradog)
                 x,y,z = self.calcularPosicion(gradoRot, gradoj1, gradoj2)
                 #Publicar posicion del end effector
                 self.msg.linear.x = x

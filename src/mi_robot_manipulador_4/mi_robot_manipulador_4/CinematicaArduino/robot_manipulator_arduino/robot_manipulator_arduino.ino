@@ -106,18 +106,18 @@ void loop() {
     
 
     //Convertir a grados negativos y positivos
-    /*newRot = newRot - 90;
-    newJ1 = newJ1 - 90;
-    newJ2 = newJ2 - 90;
-    newG = newG - 90;*/
-    /*// Imprimir los valores de los servos*/
-    /*Serial.print(newRot);
+    int rot = servo1.read() - 90;
+    int J1 = servo2.read() - 90;
+    int J2 =servo3.read() - 90;
+    int g = servo4.read() - 90;
+    // Imprimir los valores de los servos
+    Serial.print(rot);
     Serial.print(",");
-    Serial.print(newJ1);
+    Serial.print(J1);
     Serial.print(",");
-    Serial.print(newJ2);
+    Serial.print(J2);
     Serial.print(",");
-    Serial.println(newG);
-    */
+    Serial.println(g);
+    
   }              
 }

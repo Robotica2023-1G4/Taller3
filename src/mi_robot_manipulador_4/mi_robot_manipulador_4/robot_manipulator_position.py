@@ -7,9 +7,9 @@ import time
 import serial
 
 #Definir dimensiones del brazo robotico
-l1 = 0.135 #Longitud del primer eslabon (cm)
-l2 = 0.175 #Longitud del segundo eslabon (cm)
-h = 0.218 #Altura del efector final (cm)
+l1 = 12 #Longitud del primer eslabon (cm)
+l2 = 24 #Longitud del segundo eslabon (cm)
+h = 25.5 #Altura del efector final (cm)
 
 #Definir el puerto de comunicacion serial
 pserial = serial.Serial('/dev/ttyACM0', 9600)
@@ -43,7 +43,6 @@ class RobotManipulatorPosition(Node):
                 print(gradoRot)
                 print(gradoj1)
                 print(gradoj2)
-                print(gradog)
                 x,y,z = self.calcularPosicion(gradoRot, gradoj1, gradoj2)
                 #Publicar posicion del end effector
                 self.msg.linear.x = x
@@ -53,12 +52,23 @@ class RobotManipulatorPosition(Node):
 
                 #Verificar si se ha llegado a la posicion deseada
                 if goal == False and llamado == True:
-                    if abs(x-desx) < 0.01 and abs(y-desy) < 0.01 and abs(z-desz) < 0.01:
+                    if abs(x-desx) < 0.1 and abs(y-desy) < 0.1 and abs(z-desz) < 0.1:
                         goal = True
                         llamado = False
                         self.get_logger().info('Posicion deseada alcanzada')
                     else:
-                        self.calcularCinematicaInversa(x,y,z,gradoRot, gradoj1, gradoj2, gradog)
+                        #Recibir grados cinematica inversa
+                        gRot,gj1,gj2 = self.calcularCinematicaInversa()
+                        #Calcular cambio en grados de los motores
+                        dRot = gRot - gradoRot
+                        dj1 = gj1 - gradoj1
+                        dj2 = gj2 - gradoj2
+                        #Publicar cambio en grados de los motores
+                        self.msg.linear.x = dRot
+                        self.msg.linear.y = dj1
+                        self.msg.linear.z = dj2
+                        self.msg.linear.x = 0
+                        self.pubvel.publish(self.msg)
                
     def listener_callback(self, msg):
         global x,y,z
@@ -84,62 +94,45 @@ class RobotManipulatorPosition(Node):
 
         return x,y,z
     
-    def calcularCinematicaInversa(self, x, y, z, gradoRot, gradoj1, gradoj2, gradog):
+    def calcularCinematicaInversa(self):
 
-        radRot = math.radians(gradoRot)
-        radj1 = math.radians(gradoj1)
-        radj2 = math.radians(gradoj2)
+        #Calcular cinematica inversa
+        # Resto del código de cinemática inversa
+        distance = (((-desx)**2 + (desy)**2 + (desz-h)**2) - l1**2 - l2**2) / (2 * l1 * l2)
+        print(distance)
+        theta1 = math.atan2(desy, desx)
+        theta3 = math.atan2((-math.sqrt(1 - distance**2)), distance)
+        theta2 = math.atan2(desz - h,math.sqrt(desx**2+desy**2)) - math.atan2((l2 * (-math.sqrt(1-distance**2))), (l1 + l2 * distance))
+    
+        #Convertir angulos a valores entre -pi y pi
+        if theta1 > math.pi:
+            while theta1 > math.pi:
+                theta1 = theta1 - math.pi
+        elif theta1 < -math.pi:
+            while theta1 < -math.pi:
+                theta1 = theta1 + math.pi
 
-        #Calcular errores de posicion
-        ex = desx - x
-        ey = desy - y
-        ez = desz - z
+        if theta2 > math.pi:
+            while theta2 > math.pi:
+                theta2 = theta2 - math.pi
+        elif theta2 < -math.pi:
+            while theta2 < -math.pi:
+                theta2 = theta2 + math.pi
 
-        #Vector de errores
-        e = np.array([ex, ey, ez])
-
-        theta = np.zeros([radRot, radj1, radj2])  # Vector columna de radRot, radj1, radj2
-        a = np.array([l1, l2, h])  # Vector fila de l1, l2, h
-
-        #Matriz jacoviana
-        # Calcular las entradas de la matriz jacobiana
-        J = np.zeros((3,3))
-        J[0,0] = -a[0]*math.cos(theta[1])*math.sin(theta[0]) - a[1]*math.cos(theta[1] + theta[2])*math.sin(theta[0])
-        J[0,1] = -a[0]*math.cos(theta[0])*math.sin(theta[1]) - a[1]*math.sin(theta[1] + theta[2])*math.cos(theta[0])
-        J[0,2] = -a[1]*math.sin(theta[1] + theta[2])*math.cos(theta[0])
-        J[1,0] = a[0]*math.cos(theta[0])*math.cos(theta[1]) + a[1]*math.cos(theta[0])*math.cos(theta[1] + theta[2])
-        J[1,1] = -a[0]*math.sin(theta[0])*math.sin(theta[1]) - a[1]*math.sin(theta[0])*math.sin(theta[1] + theta[2])
-        J[1,2] = -a[1]*math.sin(theta[0])*math.sin(theta[1] + theta[2])
-        J[2,0] = 0
-        J[2,1] = a[0]*math.cos(theta[1]) + a[1]*math.cos(theta[1] + theta[2])
-        J[2,2] = a[1]*math.cos(theta[1] + theta[2])
-
-        #Calcular la matriz inversa de la matriz jacobiana
-        Jinv = np.linalg.inv(J)
-
-        #Calcular Matriz de ganancias
-        K = np.array([[0.1, 0, 0], [0, 0.1, 0], [0, 0, 0.1]])
-
-        #Calcular ley de control (v = Jinv*K*e)
-        v = np.dot(np.dot(Jinv, K), e)
-
-        #Calcular cambio en grados
-        dtheta = v*0.1
-
-        #Calcular nuevos grados
-        theta = theta + dtheta
+        if theta3 > math.pi:
+            while theta3 > math.pi:
+                theta3 = theta3 - math.pi
+        elif theta3 < -math.pi:
+            while theta3 < -math.pi:
+                theta3 = theta3 + math.pi
 
         #Calcular nuevos grados como valores enteros
-        gRot = int(math.degrees(theta[0]))
-        gj1 = int(math.degrees(theta[1]))
-        gj2 = int(math.degrees(theta[2]))
+        gRot = int(math.degrees(theta1))
+        gj1 = int(math.degrees(theta2))
+        gj2 = int(math.degrees(theta3))
 
-        #Publicar cambio en grados
-        self.msg.linear.x = gRot
-        self.msg.linear.y = gj1
-        self.msg.linear.z = gj2
-        self.msg.angular.x = gradog
-        self.pubvel.publish(self.msg)
+        #Retornar grados
+        return gRot,gj1,gj2
 
     
 def main(args=None):

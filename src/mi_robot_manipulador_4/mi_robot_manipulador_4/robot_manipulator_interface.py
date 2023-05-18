@@ -1,103 +1,125 @@
-import rclpy
-import threading
-from geometry_msgs.msg import Twist
-from rclpy.node import Node
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.animation as animation
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
 import tkinter as tk
-from tkinter import font as tkFont
-from tkinter import *
-import tkinter.messagebox as messagebox
-from tkinter.filedialog import *
+import threading
+import time
+import rclpy
+from rclpy.node import Node
+from geometry_msgs.msg import Twist
+from tkinter import filedialog
+from PIL import Image, ImageDraw
 
-global x,y,z,k
-x = []
-y = []
-z = []
-k = 0
+global ka
+global xs   
+global ys  
+global i   
 
-class RobotManipulatorInterface(Node):
+ka = 0
+xs = [250]
+ys = [250]
 
-    def __init__(self,interfaz):
-        super().__init__('robot_manipulator_interface')
-        self.subscription = self.create_subscription(
-            Twist,
-            'robot_manipulator_pos',
-            self.listener_callback,
-            10)
-        self.subscription  # prevent unused variable warning
+class Robot_interface(Node):
+
+    def __init__(self, interfaz):
+
+        global leer
+
+        super().__init__('robot_interface')
+        self.subscription = self.create_subscription(Twist,'robot_manipulator_pos', self.listener_callback,10)
+        self.subscription
+
         self.interfaz = interfaz
 
+    
     def listener_callback(self, msg):
-        xact = int(msg.linear.x) 
-        yact = int(msg.linear.y) 
-        zact = int(msg.linear.z) 
-
-        k = k+1
-        x.append(xact)
-        y.append(yact)
-        z.append(zact)
-
-        # Si alguna de las variables cambio con respecto al valor anterior, se envia el mensaje
-        if (x[k-1] != x[k]) or (y[k-1] != y[k]) or (z[k-1] != z[k]):
-            self.interfaz.drawpos(x[k-1],y[k-1],x[k],y[k],z[k-1],z[k])
-            
         
-      
+        global ka
+        global xs
+        global ys
+
+        ka += 1
+        xs.append(250 + int(msg.linear.x)*2)
+        ys.append(250 + int(msg.linear.y)*(-2))
+        if xs[ka-1] != xs[ka] or ys[ka-1] != ys[ka]:
+            print(xs[ka])
+            print(ys[ka])
+            self.interfaz.draw_line(xs[ka-1],ys[ka-1],xs[ka],ys[ka])
+            #self.interfaz.paint_pixel(int(250+int((msg.linear.x)*100)), (int((msg.linear.y)*(-100))+250))
+    	
+
+
 
 class MyInterfaz:
 
     def __init__(self):
-
-        self.tk = tk.Tk()
-        self.frame = tk.Frame(self, bg="#6E6E6E")
-
-        self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(111, projection='3d')
-        self.ax.set_xlim(-100, 100)
-        self.ax.set_ylim(-100, 100)
-        self.ax.set_zlim(-100, 100)
-        self.ax.set_xlabel('X')
-        self.ax.set_ylabel('Y')
-        self.ax.set_zlabel('Z')
-        self.ax.set_title('Posición del brazo robótico')
-        self.ax.grid(True)
-
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
-        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-
-        self.frame.pack(fill=tk.BOTH, expand=1) 
-
-        self.botones = tk.Frame(self)
-        self.btn_save = tk.Button(self.botones, font=('Courier',16), text="Guardar", command=self.guardar)
-
-        self.btn_save.pack(side="bottom")
-
-        self.anim1 = None
-
-        self.framegraf.pack(fill=tk.BOTH, expand=1)
-        self.botones.pack(fill="x")
-
-    def guardar(self):
-        if self.btn_save["text"] == "Guardar Figura":          
-            input_path = asksaveasfilename()
-            plt.savefig(input_path)
-        else:
-            self.btn_guardar.configure(text="Guardado")
     
-    def drawpos(self, x0, y0, x1, y1, z0, z1):
-        xs = [x0, x1]
-        ys = [y0, y1]
-        zs = [z0, z1]
-        if self.anim1:
-            self.anim1.event_source.stop()
-        self.ax.plot(xs, ys, zs, color='red')
-        self.canvas.draw()
+        self.master = tk.Tk()
+
+        #self.master.withdraw()
+
+        self.canvas = tk.Canvas(self.master, width=1000, height=1000, background='white')
+        self.canvas.pack()
+
+        # definir dimensiones de la cuadrícula
+        grid_size = 14
+        canvas_width = 1000
+        canvas_height = 1000
+
+        # crear las líneas de la cuadrícula
+        for i in range(grid_size + 1):
+            x = i * (canvas_width / grid_size)
+            self.canvas.create_line(x, 0, x, canvas_height, fill='yellow')
+            y = i * (canvas_height / grid_size)
+            self.canvas.create_line(0, y, canvas_width, y, fill='yellow')
+
+
+        self.name_entry = tk.Entry(self.master)
+        self.name_entry.pack()
+
+        self.save_button = tk.Button(self.master, text="Save Image", command=self.save_image)
+        self.save_button.pack()
+
+
+    def preguntarRecorrido(self):
+        
+        global leer
+        global lecturaTxt
+        global escribir
+        global escrituraTxt
+
+        root = tk.Tk()
+        root.withdraw()
+
+    def paint_pixel(self,posx, posy):
+
+        self.canvas.create_oval(posx, posy, posx+3, posy+3, fill='black')
+        
+    def draw_line(self,posx, posy,posx1, posy1):
+
+        self.canvas.create_line(posx, posy, posx1, posy1, width=5, fill='black')
     
+    def save_image(self):
+
+        filename = filedialog.asksaveasfilename(initialfile = str(self.name_entry.get()) + '.png',defaultextension=".png")
+
+        if filename:
+            x = self.canvas.winfo_rootx() + self.canvas.winfo_x()
+            y = self.canvas.winfo_rooty() + self.canvas.winfo_y()
+            x1 = x + self.canvas.winfo_width()
+            y1 = y + self.canvas.winfo_height()
+            image = Image.new("RGB", (self.canvas.winfo_width(), self.canvas.winfo_height()), "white")
+            draw = ImageDraw.Draw(image)
+
+            for item in self.canvas.find_all():
+                coords = self.canvas.coords(item)
+                x0 = coords[0]
+                y0 = coords[1]
+                x1 = coords[2]
+                y1 = coords[3]
+                draw.rectangle([x0, y0, x1, y1], fill="black")
+
+            image.save(filename)
+        	       
+      
+
     def start(self):
         self.master.mainloop()
 
@@ -115,7 +137,7 @@ class MyThread(threading.Thread):
 def main(args=None):
     rclpy.init()
     my_gui = MyInterfaz()
-    my_node = RobotManipulatorInterface(my_gui)
+    my_node = Robot_interface(my_gui)
     my_thread = MyThread(my_node, my_gui)
     my_thread.start()
     my_gui.start()
@@ -124,7 +146,6 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
          
             
 

@@ -19,20 +19,27 @@ global desx,desy,desz
 desx=0
 desy=0
 desz=0
-global goal #Variable que indica si se ha llegado a la posicion deseada
-goal = False
-global llamado #Variable que indica si se ha solicitado una nueva posicion
-llamado = False
+#Definir grados
+global gradoRot,gradoj1,gradoj2
+gradoRot = 0
+gradoj1 = 0
+gradoj2 = 0
+#Definir pòsicion actual
+global x,y,z
+x=0
+y=0
+z=0
 
 #Definir la clase que publique la posicion del efector final
 class RobotManipulatorPosition(Node):
     def __init__(self):
         super().__init__('robot_manipulator_position')
         self.pubpos = self.create_publisher(Twist, 'robot_manipulator_pos', 10)
+        self.pubgra = self.create_publisher(Twist, 'robot_manipulator_gra',10)
         self.pubvel = self.create_publisher(Twist, 'robot_manipulator_vel', 10)
-        self.subgoal = self.create_subscription(Twist, 'robot_manipulator_goal', self.listener_callback, 10)
         self.msg = Twist()
-        global goal,llamado, desx, desy, desz
+        self.msggrados = Twist()
+        global desx, desy, desz, gradoRot, gradoj1, gradoj2, x, y, z
         while True:
             #Obtener angulos de los motores a partir del puerto serial
             grados = pserial.readline().decode().rstrip().split(',')
@@ -44,39 +51,11 @@ class RobotManipulatorPosition(Node):
                 self.msg.linear.x = x
                 self.msg.linear.y = y
                 self.msg.linear.z = z
+                self.msggrados.linear.x = gradoRot
+                self.msggrados.linear.y = gradoj1
+                self.msggrados.linear.z = gradoj2
                 self.pubpos.publish(self.msg)
-
-                #Verificar si se ha llegado a la posicion deseada
-                if goal == False and llamado == True:
-                    print(desx)
-                    if abs(x-desx) < 0.1 and abs(y-desy) < 0.1 and abs(z-desz) < 0.1:
-                        goal = True
-                        llamado = False
-                        self.get_logger().info('Posicion deseada alcanzada')
-                    else:
-                        #Recibir grados cinematica inversa
-                        gRot,gj1,gj2 = self.calcularCinematicaInversa()
-                        #Calcular cambio en grados de los motores
-                        dRot = gRot - gradoRot
-                        dj1 = gj1 - gradoj1
-                        dj2 = gj2 - gradoj2
-                        #Publicar cambio en grados de los motores
-                        self.msg.linear.x = dRot
-                        self.msg.linear.y = dj1
-                        self.msg.linear.z = dj2
-                        self.msg.linear.x = 0
-                        self.pubvel.publish(self.msg)
-               
-    def listener_callback(self, msg):
-        global x,y,z
-        global goal
-        global llamado
-        desx = msg.linear.x
-        desy = msg.linear.y
-        desz = msg.linear.z
-        goal = False
-        llamado = True
-        self.get_logger().info('Posicion solicitada en x: "%f"' % desx + ' y: "%f"' % desy + ' z: "%f"' % desz)
+            
 
     def calcularPosicion(self, gradoRot, gradoj1, gradoj2):
         #Convierter grados a radianes
@@ -90,46 +69,6 @@ class RobotManipulatorPosition(Node):
         z = h + l1*math.sin(radj1) + l2*math.sin(radj1 + radj2)
 
         return x,y,z
-    
-    def calcularCinematicaInversa(self):
-
-        #Calcular cinematica inversa
-        # Resto del código de cinemática inversa
-        distance = (((-desx)**2 + (desy)**2 + (desz-h)**2) - l1**2 - l2**2) / (2 * l1 * l2)
-        print(distance)
-        theta1 = math.atan2(desy, desx)
-        theta3 = math.atan2((-math.sqrt(1 - distance**2)), distance)
-        theta2 = math.atan2(desz - h,math.sqrt(desx**2+desy**2)) - math.atan2((l2 * (-math.sqrt(1-distance**2))), (l1 + l2 * distance))
-    
-        #Convertir angulos a valores entre -pi y pi
-        if theta1 > math.pi:
-            while theta1 > math.pi:
-                theta1 = theta1 - math.pi
-        elif theta1 < -math.pi:
-            while theta1 < -math.pi:
-                theta1 = theta1 + math.pi
-
-        if theta2 > math.pi:
-            while theta2 > math.pi:
-                theta2 = theta2 - math.pi
-        elif theta2 < -math.pi:
-            while theta2 < -math.pi:
-                theta2 = theta2 + math.pi
-
-        if theta3 > math.pi:
-            while theta3 > math.pi:
-                theta3 = theta3 - math.pi
-        elif theta3 < -math.pi:
-            while theta3 < -math.pi:
-                theta3 = theta3 + math.pi
-
-        #Calcular nuevos grados como valores enteros
-        gRot = int(math.degrees(theta1))
-        gj1 = int(math.degrees(theta2))
-        gj2 = int(math.degrees(theta3))
-
-        #Retornar grados
-        return gRot,gj1,gj2
 
     
 def main(args=None):

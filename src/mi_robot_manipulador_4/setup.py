@@ -24,6 +24,7 @@ setup(
             'control = mi_robot_manipulador_4.robot_manipulator_controller:main',
             'position = mi_robot_manipulador_4.robot_manipulator_position:main',
             'interface = mi_robot_manipulador_4.robot_manipulator_interface:main',
+            'inversa = mi_robot_manipulador_4.robot_manipulator_cininversa:main',
             'planner = mi_robot_manipulador_4.robot_manipulator_planner:main',
         ],
     },

@@ -39,8 +39,6 @@ class Robot_interface(Node):
         xs.append(250 + int(msg.linear.x)*2)
         ys.append(250 + int(msg.linear.y)*(-2))
         if xs[ka-1] != xs[ka] or ys[ka-1] != ys[ka]:
-            print(xs[ka])
-            print(ys[ka])
             self.interfaz.draw_line(xs[ka-1],ys[ka-1],xs[ka],ys[ka])
             #self.interfaz.paint_pixel(int(250+int((msg.linear.x)*100)), (int((msg.linear.y)*(-100))+250))
     	

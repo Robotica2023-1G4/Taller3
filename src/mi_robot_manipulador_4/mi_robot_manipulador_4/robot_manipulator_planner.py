@@ -44,7 +44,7 @@ posz = float(posz)
 
 class RobotManipulatorPlanner(Node):
     def __init__(self):
-        super().__init__('robot_manipulator_teleop')
+        super().__init__('robot_manipulator_planner')
         self.pubcmd = self.create_publisher(Twist, 'robot_manipulator_goal', 10)
         self.pubzone = self.create_publisher(String, 'robot_manipulator_zone', 10)
         self.msg = Twist()
@@ -64,3 +64,13 @@ class RobotManipulatorPlanner(Node):
             #Publicar zona de interes
             self.msgzone.data = str(zona)
             self.pubzone.publish(self.msgzone)
+
+def main(args=None):
+    rclpy.init(args=args)
+    robot_manipulator_planner = RobotManipulatorPlanner()
+    rclpy.spin(robot_manipulator_planner)
+    robot_manipulator_position.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()

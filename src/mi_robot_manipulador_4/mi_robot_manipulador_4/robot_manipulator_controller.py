@@ -31,6 +31,7 @@ class RobotManipulatorController(Node):
         velg = int(msg.angular.x)
         velrotg = int(msg.angular.z) 
         message = f"{velRot},{velj1},{velj2},{velj3},{velg},{velrotg}\n" # creamos el mensaje con el formato requerido por Arduino
+        print(message)
         pserial.write(message.encode()) # enviamos el mensaje a través del puerto serial
         
 

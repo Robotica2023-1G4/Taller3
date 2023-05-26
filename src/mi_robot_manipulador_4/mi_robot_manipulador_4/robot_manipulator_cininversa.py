@@ -31,10 +31,12 @@ class RobotManipulatorCininversa(Node):
         self.subgra = self.create_subscription(Twist,'robot_manipulator_gra', self.listener_callback1,10)
         self.subgoal = self.create_subscription(Twist,'robot_manipulator_goal', self.listener_callback2,10)
         self.msg = Twist()
+        self.pubvel.publish(self.msg)
         self.msggrados = Twist()
 
     def listener_callback1(self, msggrados):
         global gradoRot,gradoj1,gradoj2
+        print('adios')
         gradoRot = msggrados.linear.x
         gradoj1 = msggrados.linear.y
         gradoj2 = msggrados.linear.z
@@ -52,14 +54,15 @@ class RobotManipulatorCininversa(Node):
         #Recibir grados cinematica inversa
         gRot,gj1,gj2 = self.calcularCinematicaInversa()
         #Calcular cambio en grados de los motores
+        print(gRot,gj1,gj2)
         dRot = gRot - gradoRot
         dj1 = gj1 - gradoj1
         dj2 = gj2 - gradoj2
         #Publicar cambio en grados de los motores
-        self.msg.linear.x = dRot
-        self.msg.linear.y = dj1
-        self.msg.linear.z = dj2
-        self.msg.linear.x = 0
+        self.msg.linear.x = float(dRot)
+        self.msg.linear.y = float(dj1)
+        self.msg.linear.z = float(dj2)
+        self.msg.linear.x = 0.0
         self.pubvel.publish(self.msg)
     
     def calcularCinematicaInversa(self):
@@ -67,7 +70,6 @@ class RobotManipulatorCininversa(Node):
         #Calcular cinematica inversa
         # Resto del código de cinemática inversa
         distance = (((-desx)**2 + (desy)**2 + (desz-h)**2) - l1**2 - l2**2) / (2 * l1 * l2)
-        print(distance)
         theta1 = math.atan2(desy, desx)
         theta3 = math.atan2((-math.sqrt(1 - distance**2)), distance)
         theta2 = math.atan2(desz - h,math.sqrt(desx**2+desy**2)) - math.atan2((l2 * (-math.sqrt(1-distance**2))), (l1 + l2 * distance))

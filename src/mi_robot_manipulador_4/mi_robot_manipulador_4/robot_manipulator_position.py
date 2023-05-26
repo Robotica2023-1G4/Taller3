@@ -48,12 +48,13 @@ class RobotManipulatorPosition(Node):
                 gradoRot, gradoj1, gradoj2, gradog = int(grados[0]), int(grados[1]), int(grados[2]), int(grados[3])
                 x,y,z = self.calcularPosicion(gradoRot, gradoj1, gradoj2)
                 #Publicar posicion del end effector
+                print(grados)
                 self.msg.linear.x = x
                 self.msg.linear.y = y
                 self.msg.linear.z = z
-                self.msggrados.linear.x = gradoRot
-                self.msggrados.linear.y = gradoj1
-                self.msggrados.linear.z = gradoj2
+                self.msggrados.linear.x = float(gradoRot)
+                self.msggrados.linear.y = float(gradoj1)
+                self.msggrados.linear.z = float(gradoj2)
                 self.pubpos.publish(self.msg)
             
 

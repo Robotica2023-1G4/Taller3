@@ -4,7 +4,7 @@ import numpy as np
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 import time
-import serial
+
 
 #Definir dimensiones del brazo robotico
 l1 = 12 #Longitud del primer eslabon (cm)
@@ -50,19 +50,25 @@ class RobotManipulatorCininversa(Node):
         desz = msg.linear.z
         self.get_logger().info('Posicion solicitada en x: "%f"' % desx + ' y: "%f"' % desy + ' z: "%f"' % desz)
 
+        gradoRot=int(gradoRot)
+        gradoj1=int(gradoj1)
+        gradoj2=int(gradoj2)
+
         
         #Recibir grados cinematica inversa
         gRot,gj1,gj2 = self.calcularCinematicaInversa()
         #Calcular cambio en grados de los motores
         print(gRot,gj1,gj2)
+        print(gradoRot)
         dRot = gRot - gradoRot
+        print(dRot)
         dj1 = gj1 - gradoj1
         dj2 = gj2 - gradoj2
         #Publicar cambio en grados de los motores
         self.msg.linear.x = float(dRot)
         self.msg.linear.y = float(dj1)
         self.msg.linear.z = float(dj2)
-        self.msg.linear.x = 0.0
+        self.msg.angular.x = 0.0
         self.pubvel.publish(self.msg)
     
     def calcularCinematicaInversa(self):

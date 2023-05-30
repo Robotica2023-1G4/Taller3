@@ -25,6 +25,7 @@ class RobotManipulatorController(Node):
 
     def listener_callback(self, msg):
         velRot = int(msg.linear.x) 
+        print(velRot)
         velj1 = int(msg.linear.y) 
         velj2 = int(msg.linear.z)
         velj3 = int(msg.angular.y)

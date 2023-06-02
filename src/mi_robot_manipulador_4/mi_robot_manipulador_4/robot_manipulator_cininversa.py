@@ -3,6 +3,7 @@ import math
 import numpy as np
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
+from std_msgs.msg import String
 import time
 
 
@@ -21,6 +22,11 @@ global gradoRot,gradoj1,gradoj2
 gradoRot = 0
 gradoj1 = 0
 gradoj2 = 0
+#Definir posiciones de la zona de interes
+global gradoRotZone,gradoj1Zone,gradoj2Zone
+gradoRotZone = 0
+gradoj1Zone = 0
+gradoj2Zone = 0
 
 
 #Definir la clase que publique la posicion del efector final
@@ -30,38 +36,32 @@ class RobotManipulatorCininversa(Node):
         self.pubvel = self.create_publisher(Twist, 'robot_manipulator_vel', 10)
         self.subgra = self.create_subscription(Twist,'robot_manipulator_gra', self.listener_callback1,10)
         self.subgoal = self.create_subscription(Twist,'robot_manipulator_goal', self.listener_callback2,10)
+        self.subzone = self.create_subscription(String,'robot_manipulator_zone', self.listener_callback3,10)
         self.msg = Twist()
         self.pubvel.publish(self.msg)
         self.msggrados = Twist()
 
     def listener_callback1(self, msggrados):
         global gradoRot,gradoj1,gradoj2
-        print('adios')
         gradoRot = msggrados.linear.x
         gradoj1 = msggrados.linear.y
         gradoj2 = msggrados.linear.z
 
 
     def listener_callback2(self, msg):
-        print('hola')
-        global desx,desy,desz,x,y,z,gradoRot,gradoj1,gradoj2
+        global desx,desy,desz,gradoRot,gradoj1,gradoj2
         desx = msg.linear.x
         desy = msg.linear.y
         desz = msg.linear.z
-        self.get_logger().info('Posicion solicitada en x: "%f"' % desx + ' y: "%f"' % desy + ' z: "%f"' % desz)
 
         gradoRot=int(gradoRot)
         gradoj1=int(gradoj1)
         gradoj2=int(gradoj2)
-
         
         #Recibir grados cinematica inversa
         gRot,gj1,gj2 = self.calcularCinematicaInversa()
         #Calcular cambio en grados de los motores
-        print(gRot,gj1,gj2)
-        print(gradoRot)
         dRot = gRot - gradoRot
-        print(dRot)
         dj1 = gj1 - gradoj1
         dj2 = gj2 - gradoj2
         #Publicar cambio en grados de los motores
@@ -70,6 +70,42 @@ class RobotManipulatorCininversa(Node):
         self.msg.linear.z = float(dj2)
         self.msg.angular.x = 0.0
         self.pubvel.publish(self.msg)
+
+    def listener_callback3(self, msg):
+        global gradoRotZone,gradoj1Zone,gradoj2Zone,gradoRot,gradoj1,gradoj2
+        
+        gradoRot=int(gradoRot)
+        gradoj1=int(gradoj1)
+        gradoj2=int(gradoj2)
+
+        #Calcular cambio en grados de los motores
+        dRot = gradoRotZone - gradoRot
+        dj1 = gradoj1Zone - gradoj1
+        dj2 = gradoj2Zone - gradoj2
+        #Publicar cambio en grados de los motores
+        self.msg.linear.x = float(dRot)
+        self.msg.linear.y = float(dj1)
+        self.msg.linear.z = float(dj2)
+        self.msg.angular.x = 0.0
+        self.pubvel.publish(self.msg)
+
+        #Esperar 2 segundos
+        time.sleep(2)
+
+        #Cierro la garra
+        twistmsg = Twist()
+        twistmsg.angular.x = 40.0 
+        self.pubvel.publish(twistmsg)
+
+        #Esperar 2 segundos
+        time.sleep(2)
+
+        #Elevo el brazo
+        twistmsg = Twist()
+        twistmsg.linear.z = 30.0
+        self.pubvel.publish(twistmsg)
+
+
     
     def calcularCinematicaInversa(self):
 

@@ -18,7 +18,7 @@ opcion = 0
 #Preguntar si quiere mover el robot a un punto o localizar un objeto con la garra (1 o 2)
 print("¿Que desea hacer?")
 print("1. Mover el robot a un punto")
-print("2. Localizar un objeto con la garra")
+print("2. Agarrar objeto con la garra")
 opcion = input("Ingrese el numero de la opcion: ")
 
 opcion = int(opcion)
@@ -30,12 +30,7 @@ if opcion == 1:
     posz = input("Ingrese la posicion en z: ")
 elif opcion == 2:
     #Preguntar en que zona de la base se encuentra el objeto
-    print("¿En que zona de la base se encuentra el objeto?")
-    print("1. Zona Izquierda")
-    print("2. Zona Centro")
-    print("3. Zona Derecha")
-    zona = input("Ingrese el numero de la zona: ")
-    zona = int(zona)
+    zona = opcion
 
 
 posx = float(posx)
@@ -69,7 +64,7 @@ def main(args=None):
     rclpy.init(args=args)
     robot_manipulator_planner = RobotManipulatorPlanner()
     rclpy.spin(robot_manipulator_planner)
-    robot_manipulator_position.destroy_node()
+    robot_manipulator_planner.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':

@@ -54,7 +54,7 @@ void loop() {
     Serial.println(movrotg);
     // mueve el servo 1
     if (movRot != 0) {
-      int rotGrados = constrain(movRot, -90, 90); // limita el valor del servo1_pos al rango de -90 a 90 grados
+      int rotGrados = map(movRot, -90, 90, -60, 60); // mapea el valor de -90 a 90 a -60 a 60 (grados
       int newRot = servo1.read() + rotGrados; // lee la posición actual del servo y le suma los grados de movimiento
       newRot = constrain(newRot, 0, 180); // limita el nuevo valor al rango de 0 a 180 grados
       servo1.write(newRot); // mueve el servo a la nueva posición  
@@ -62,8 +62,7 @@ void loop() {
     
     // mueve el servo 2
     if (movj1 != 0) {
-      int j1grados = constrain(movj1, -90, 90);
-      int newJ1 = servo2.read() + j1grados;
+      int newJ1 = servo2.read() + movj1;
       newJ1 = constrain(newJ1, 0, 180);
       servo2.write(newJ1);  
     }
@@ -71,16 +70,14 @@ void loop() {
     
     // mueve el servo 3
     if (movj2 != 0) {
-      int j2grados = constrain(movj2, -90, 90);
-      int newJ2 = servo3.read() + j2grados;
+      int newJ2 = servo3.read() + movj2;
       newJ2 = constrain(newJ2, 0, 180);
       servo3.write(newJ2);
     }
 
     // mueve el servo 4
     if (movj3 != 0) {
-      int j3grados = constrain(movj3, -90, 90);
-      int newJ3 = servo4.read() + j3grados;
+      int newJ3 = servo4.read() + movj3;
       newJ3 = constrain(newJ3, 0, 180);
       servo4.write(newJ3);
     }
@@ -88,8 +85,7 @@ void loop() {
     // mueve el servo de rotacion de la garra
     if (movrotg != 0) {
       
-      int rotgrados = constrain(movrotg, -90, 90);
-      int newrotgrados = servo5.read() + rotgrados;
+      int newrotgrados = servo5.read() + movrotg;
       newrotgrados = constrain(newrotgrados, 0, 180);
       
       servo5.write(newrotgrados);
@@ -98,20 +94,20 @@ void loop() {
     // mueve el servo de la garra
     if (movg != 0) {
       
-      int ggrados = constrain(movg, -90, 90);
-      int newG = servo6.read() + ggrados;
+      int newG = servo6.read() + movg;
       newG = constrain(newG, 0, 180);
       servo6.write(newG);  
     }
     
 
     //Convertir a grados negativos y positivos
-    int rot = servo1.read() - 90;
+    int rot1 = servo1.read() - 90;
+    int rotMap = map(rot1, -60, 60, -90, 90);
     int J1 = servo2.read() - 90;
     int J2 =servo3.read() - 90;
     int g = servo4.read() - 90;
     // Imprimir los valores de los servos
-    Serial.print(rot);
+    Serial.print(rotMap);
     Serial.print(",");
     Serial.print(J1);
     Serial.print(",");

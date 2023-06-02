@@ -47,8 +47,6 @@ class RobotManipulatorPosition(Node):
             if len(grados) >= 4:
                 gradoRot, gradoj1, gradoj2, gradog = int(grados[0]), int(grados[1]), int(grados[2]), int(grados[3])
                 x,y,z = self.calcularPosicion(gradoRot, gradoj1, gradoj2)
-                print(grados)
-                print(x,y,z)
                 #Publicar posicion del end effector
                 self.msg.linear.x = x
                 self.msg.linear.y = y

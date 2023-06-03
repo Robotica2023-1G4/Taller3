@@ -41,9 +41,9 @@ class RobotManipulatorPlanner(Node):
     def __init__(self):
         super().__init__('robot_manipulator_planner')
         self.pubcmd = self.create_publisher(Twist, 'robot_manipulator_goal', 10)
-        self.pubzone = self.create_publisher(String, 'robot_manipulator_zone', 10)
+        self.pubzone = self.create_publisher(Twist, 'robot_manipulator_zone', 10)
         self.msg = Twist()
-        self.msgzone = String()
+        self.msgzone = Twist()
 
         #Llamado a variables globales de interes
         global posx, posy, posz, zona, opcion
@@ -57,7 +57,6 @@ class RobotManipulatorPlanner(Node):
             self.pubcmd.publish(self.msg)
         elif opcion == 2:
             #Publicar zona de interes
-            self.msgzone.data = str(zona)
             self.pubzone.publish(self.msgzone)
 
 def main(args=None):

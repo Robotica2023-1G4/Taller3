@@ -8,9 +8,9 @@ import time
 
 
 #Definir dimensiones del brazo robotico
-l1 = 12 #Longitud del primer eslabon (cm)
-l2 = 24 #Longitud del segundo eslabon (cm)
-h = 25.5 #Altura del efector final (cm)
+l1 = 13 #Longitud del primer eslabon (cm)
+l2 = 26 #Longitud del segundo eslabon (cm)
+h = 31 #Altura del efector final (cm)
 
 #Definir variables globales de posicion deseada del efector final
 global desx,desy,desz
@@ -25,8 +25,8 @@ gradoj2 = 0
 #Definir posiciones de la zona de interes
 global gradoRotZone,gradoj1Zone,gradoj2Zone
 gradoRotZone = 0
-gradoj1Zone = 0
-gradoj2Zone = 0
+gradoj1Zone = 180
+gradoj2Zone = 30
 
 
 #Definir la clase que publique la posicion del efector final
@@ -36,7 +36,7 @@ class RobotManipulatorCininversa(Node):
         self.pubvel = self.create_publisher(Twist, 'robot_manipulator_vel', 10)
         self.subgra = self.create_subscription(Twist,'robot_manipulator_gra', self.listener_callback1,10)
         self.subgoal = self.create_subscription(Twist,'robot_manipulator_goal', self.listener_callback2,10)
-        self.subzone = self.create_subscription(String,'robot_manipulator_zone', self.listener_callback3,10)
+        self.subzone = self.create_subscription(Twist,'robot_manipulator_zone', self.listener_callback3,10)
         self.msg = Twist()
         self.pubvel.publish(self.msg)
         self.msggrados = Twist()

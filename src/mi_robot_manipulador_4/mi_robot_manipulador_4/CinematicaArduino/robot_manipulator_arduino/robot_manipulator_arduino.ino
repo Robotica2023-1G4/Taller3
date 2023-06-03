@@ -54,15 +54,15 @@ void loop() {
     Serial.println(movrotg);
     // mueve el servo 1
     if (movRot != 0) {
-      int rotGrados = map(movRot, -90, 90, -60, 60); // mapea el valor de -90 a 90 a -60 a 60 (grados
-      int newRot = servo1.read() + rotGrados; // lee la posición actual del servo y le suma los grados de movimiento
+      int newRot = servo1.read() + movRot; // lee la posición actual del servo y le suma los grados de movimiento
       newRot = constrain(newRot, 0, 180); // limita el nuevo valor al rango de 0 a 180 grados
       servo1.write(newRot); // mueve el servo a la nueva posición  
     }
     
     // mueve el servo 2
     if (movj1 != 0) {
-      int newJ1 = servo2.read() + movj1;
+      int j1 = map(movj1, -90, 90, -60, 60);
+      int newJ1 = servo2.read() + j1;
       newJ1 = constrain(newJ1, 0, 180);
       servo2.write(newJ1);  
     }
@@ -101,15 +101,16 @@ void loop() {
     
 
     //Convertir a grados negativos y positivos
-    int rot1 = servo1.read() - 90;
-    int rotMap = map(rot1, -60, 60, -90, 90);
+    int rot1 = servo1.read() - 90 - 10;
     int J1 = servo2.read() - 90;
-    int J2 =servo3.read() - 90;
+    int mJ1= map(J1, -60, 60, -90, 90);
+    int mMJ1=mJ1+67;
+    int J2 =servo3.read() - 90 - 10;
     int g = servo4.read() - 90;
     // Imprimir los valores de los servos
-    Serial.print(rotMap);
+    Serial.print(rot1);
     Serial.print(",");
-    Serial.print(J1);
+    Serial.print(mMJ1);
     Serial.print(",");
     Serial.print(J2);
     Serial.print(",");

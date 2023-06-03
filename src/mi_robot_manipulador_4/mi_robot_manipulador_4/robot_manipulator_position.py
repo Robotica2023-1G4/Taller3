@@ -7,9 +7,9 @@ import time
 import serial
 
 #Definir dimensiones del brazo robotico
-l1 = 12 #Longitud del primer eslabon (cm)
-l2 = 24 #Longitud del segundo eslabon (cm)
-h = 25.5 #Altura del efector final (cm)
+l1 = 13 #Longitud del primer eslabon (cm)
+l2 = 26 #Longitud del segundo eslabon (cm)
+h = 31 #Altura del efector final (cm)
 
 #Definir el puerto de comunicacion serial
 pserial = serial.Serial('/dev/ttyACM0', 9600)
@@ -43,11 +43,12 @@ class RobotManipulatorPosition(Node):
         while True:
             #Obtener angulos de los motores a partir del puerto serial
             grados = pserial.readline().decode().rstrip().split(',')
-
+            print(grados)
             if len(grados) >= 4:
                 gradoRot, gradoj1, gradoj2, gradog = int(grados[0]), int(grados[1]), int(grados[2]), int(grados[3])
                 x,y,z = self.calcularPosicion(gradoRot, gradoj1, gradoj2)
                 #Publicar posicion del end effector
+                print(x,y,z)
                 self.msg.linear.x = x
                 self.msg.linear.y = y
                 self.msg.linear.z = z

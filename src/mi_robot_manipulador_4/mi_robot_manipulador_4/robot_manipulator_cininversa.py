@@ -8,9 +8,9 @@ import time
 
 
 #Definir dimensiones del brazo robotico
-l1 = 13 #Longitud del primer eslabon (cm)
-l2 = 26 #Longitud del segundo eslabon (cm)
-h = 31 #Altura del efector final (cm)
+l1 = 12 #Longitud del primer eslabon (cm)
+l2 = 12 #Longitud del segundo eslabon (cm)
+h = 30 #Altura del efector final (cm)
 
 #Definir variables globales de posicion deseada del efector final
 global desx,desy,desz
@@ -25,8 +25,8 @@ gradoj2 = 0
 #Definir posiciones de la zona de interes
 global gradoRotZone,gradoj1Zone,gradoj2Zone
 gradoRotZone = 0
-gradoj1Zone = 180
-gradoj2Zone = 30
+gradoj1Zone = -30
+gradoj2Zone = 15
 
 
 #Definir la clase que publique la posicion del efector final
@@ -62,12 +62,12 @@ class RobotManipulatorCininversa(Node):
         gRot,gj1,gj2 = self.calcularCinematicaInversa()
         #Calcular cambio en grados de los motores
         dRot = gRot - gradoRot
-        dj1 = gj1 - gradoj1
+        dj1 = -(gj1 - gradoj1)
         dj2 = gj2 - gradoj2
         #Publicar cambio en grados de los motores
         self.msg.linear.x = float(dRot)
-        self.msg.linear.y = float(dj1)
-        self.msg.linear.z = float(dj2)
+        self.msg.linear.z = float(dj1)
+        self.msg.angular.y = float(dj2)
         self.msg.angular.x = 0.0
         self.pubvel.publish(self.msg)
 
@@ -80,21 +80,33 @@ class RobotManipulatorCininversa(Node):
 
         #Calcular cambio en grados de los motores
         dRot = gradoRotZone - gradoRot
-        dj1 = gradoj1Zone - gradoj1
+        dj1 = -(30 - gradoj1)
         dj2 = gradoj2Zone - gradoj2
         #Publicar cambio en grados de los motores
         self.msg.linear.x = float(dRot)
-        self.msg.linear.y = float(dj1)
-        self.msg.linear.z = float(dj2)
-        self.msg.angular.x = 0.0
+        self.msg.linear.z = float(dj1)
+        self.msg.angular.y = float(dj2)
+        self.msg.angular.z = -80.0
         self.pubvel.publish(self.msg)
 
         #Esperar 2 segundos
         time.sleep(2)
 
+        #Calcular cambio en grados de los motores
+        twistmsg = Twist()
+        #Publicar cambio en grados de los motores
+        twistmsg.linear.x = 0.0
+        twistmsg.linear.z = 60.0
+        twistmsg.angular.y = 0.0
+        twistmsg.angular.z = 0.0
+        self.pubvel.publish(twistmsg)
+
+        #Esperar 2 segundos
+        time.sleep(2)
+        
         #Cierro la garra
         twistmsg = Twist()
-        twistmsg.angular.x = 40.0 
+        twistmsg.angular.z = 80.0 
         self.pubvel.publish(twistmsg)
 
         #Esperar 2 segundos
@@ -102,7 +114,16 @@ class RobotManipulatorCininversa(Node):
 
         #Elevo el brazo
         twistmsg = Twist()
-        twistmsg.linear.z = 30.0
+        twistmsg.angular.y = 60.0
+        self.pubvel.publish(twistmsg)
+
+        #Esperar 5 segundos 
+        time.sleep(5)
+
+        #Bajar el brazo
+        twistmsg = Twist()
+        twistmsg.angular.y = -60.0
+        twistmsg.angular.z = -80.0
         self.pubvel.publish(twistmsg)
 
 
